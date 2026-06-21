@@ -11,6 +11,7 @@
 		482B0DFC66644D90EA1E7949 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1E13F9D4FE0CFE72FC213E /* ContentView.swift */; };
 		4B626DEBD73A2C994B67A37A /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22E1041E494E3A030172B107 /* AuthView.swift */; };
 		7B90DDBC8CC1C2DAE1CD8F7D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90BC5FF79C4DBCD5B230B421 /* SettingsView.swift */; };
+		947D32E6F73263A1CAA205A4 /* AddDomainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8D4F62203E5A40B89027F47 /* AddDomainView.swift */; };
 		9E400FE65F43C1D2EB94F674 /* UnblockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD2E7F4312CCF6B215AA2E2 /* UnblockView.swift */; };
 		C2EAD36D7887B4F6CB0958BC /* NoxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D47FE31998019A7B88CAA7B /* NoxApp.swift */; };
 		C7AC9FB6DD10B822B37C4FAA /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8AA9566C428C9B59301E47A /* Theme.swift */; };
@@ -28,6 +29,7 @@
 		86A80F85BC796848A6EA5ABF /* BlocklistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlocklistView.swift; sourceTree = "<group>"; };
 		90BC5FF79C4DBCD5B230B421 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		914E4F12CC47002B9A3EF281 /* Nox.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Nox.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A8D4F62203E5A40B89027F47 /* AddDomainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddDomainView.swift; sourceTree = "<group>"; };
 		D8AA9566C428C9B59301E47A /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -57,6 +59,7 @@
 		649148672A0FB0632897891B /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				A8D4F62203E5A40B89027F47 /* AddDomainView.swift */,
 				22E1041E494E3A030172B107 /* AuthView.swift */,
 				86A80F85BC796848A6EA5ABF /* BlocklistView.swift */,
 				90BC5FF79C4DBCD5B230B421 /* SettingsView.swift */,
@@ -131,6 +134,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				947D32E6F73263A1CAA205A4 /* AddDomainView.swift in Sources */,
 				4B626DEBD73A2C994B67A37A /* AuthView.swift in Sources */,
 				387EB8D7209FA0CBFF8BE0D4 /* BlockController.swift in Sources */,
 				CDFFCDEEE2B7FC29F713F16C /* BlocklistView.swift in Sources */,

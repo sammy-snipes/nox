@@ -1,129 +1,22 @@
 import SwiftUI
 
-struct NoPasteTextField: UIViewRepresentable {
-    @Binding var text: String
-    var placeholder: String
-    var font: UIFont
-    var textColor: UIColor
-    var onTextChange: (String) -> Void
-
-    func makeUIView(context: Context) -> NoPasteUITextField {
-        let field = NoPasteUITextField()
-        field.placeholder = placeholder
-        field.font = font
-        field.textColor = textColor
-        field.backgroundColor = .clear
-        field.attributedPlaceholder = NSAttributedString(
-            string: placeholder,
-            attributes: [
-                .foregroundColor: UIColor.white.withAlphaComponent(0.3),
-                .font: font,
-            ]
-        )
-        field.autocapitalizationType = .none
-        field.autocorrectionType = .no
-        field.spellCheckingType = .no
-        field.delegate = context.coordinator
-        field.tintColor = .white
-        return field
-    }
-
-    func updateUIView(_ uiView: NoPasteUITextField, context: Context) {
-        if uiView.text != text {
-            uiView.text = text
-        }
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-
-    class Coordinator: NSObject, UITextFieldDelegate {
-        var parent: NoPasteTextField
-
-        init(_ parent: NoPasteTextField) {
-            self.parent = parent
-        }
-
-        func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-            let current = textField.text ?? ""
-            guard let textRange = Range(range, in: current) else { return false }
-            let updated = current.replacingCharacters(in: textRange, with: string)
-            parent.text = updated
-            parent.onTextChange(updated)
-            return false
-        }
-    }
-}
-
-class NoPasteUITextField: UITextField {
-    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
-        if action == #selector(paste(_:)) {
-            return false
-        }
-        return super.canPerformAction(action, withSender: sender)
-    }
-}
-
+/// Turning nox off isn't instant: you start a countdown and have to wait out
+/// the delay you set. Leave this screen and the wait resets to full.
 struct UnblockView: View {
     @EnvironmentObject var controller: BlockController
     @Environment(\.dismiss) var dismiss
 
-    static let unlockText = "I am choosing to remove the restrictions I placed on myself. I understand that I set these boundaries for a reason, and that this moment of weakness will pass. I am making a deliberate choice to prioritize short-term comfort over my long-term goals. This is not what I want."
-
-    @State private var typedText = ""
-    @State private var showReset = false
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            Text("type to unblock")
-                .font(Theme.mono(.title3))
-                .foregroundColor(Theme.text)
-
-            Text(Self.unlockText)
-                .font(Theme.mono(.caption))
-                .foregroundColor(Theme.text)
-                .lineSpacing(4)
-
-            Rectangle()
-                .frame(height: 1)
-                .foregroundColor(Theme.border)
-
-            NoPasteTextField(
-                text: $typedText,
-                placeholder: "start typing...",
-                font: UIFont.monospacedSystemFont(ofSize: 16, weight: .regular),
-                textColor: .white,
-                onTextChange: handleTextChange
-            )
-            .frame(height: 44)
-
-            Rectangle()
-                .frame(height: 1)
-                .foregroundColor(Theme.border)
-
-            HStack {
-                Spacer()
-                Text("\(typedText.count) / \(Self.unlockText.count)")
-                    .font(Theme.mono(.caption))
-                    .foregroundColor(Theme.text)
+        ZStack {
+            Theme.background.ignoresSafeArea()
+            TimelineView(.periodic(from: .now, by: 1)) { context in
+                content(now: context.date)
             }
-
-            if showReset {
-                Text("typo. reset.")
-                    .font(Theme.mono(.caption))
-                    .foregroundColor(Theme.text)
-            }
-
-            Spacer()
         }
-        .padding(24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background(Theme.background)
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button(action: { dismiss() }) {
+                Button(action: cancel) {
                     Text("<")
                         .font(Theme.mono(.body))
                         .foregroundColor(Theme.text)
@@ -132,23 +25,60 @@ struct UnblockView: View {
         }
         .toolbarBackground(Theme.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
+        .onAppear { controller.beginUnlock() }
     }
 
-    private func handleTextChange(_ newText: String) {
-        let target = Self.unlockText
+    private func content(now: Date) -> some View {
+        let remaining = max(0, controller.unlockReadyAt?.timeIntervalSince(now) ?? 0)
+        let ready = remaining <= 0
 
-        if newText == target {
-            controller.stopBlocking()
-            dismiss()
-            return
-        }
+        return VStack(alignment: .leading, spacing: 24) {
+            Text("turn off nox")
+                .font(Theme.mono(.title3))
+                .foregroundColor(Theme.text)
 
-        if !target.hasPrefix(newText) {
-            typedText = ""
-            showReset = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                showReset = false
+            Text("you set a \(controller.unlockDelayMinutes) minute delay. wait it out, then confirm. go back and it resets to \(controller.unlockDelayMinutes):00.")
+                .font(Theme.mono(.caption))
+                .foregroundColor(Theme.text)
+                .lineSpacing(4)
+
+            Rectangle().frame(height: 1).foregroundColor(Theme.border)
+
+            Text(format(remaining))
+                .font(.system(size: 56, weight: .regular, design: .monospaced))
+                .foregroundColor(Theme.text)
+
+            if ready {
+                Button(action: confirm) {
+                    Text("[ confirm — turn nox off ]")
+                        .terminalButton()
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.plain)
+            } else {
+                Text("waiting...")
+                    .font(Theme.mono(.caption))
+                    .foregroundColor(Theme.text)
             }
+
+            Spacer()
         }
+        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+    }
+
+    private func format(_ t: TimeInterval) -> String {
+        let total = Int(t.rounded(.up))
+        return String(format: "%02d:%02d", total / 60, total % 60)
+    }
+
+    private func confirm() {
+        controller.completeUnlock()
+        dismiss()
+    }
+
+    private func cancel() {
+        controller.cancelUnlock()
+        dismiss()
     }
 }
