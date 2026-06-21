@@ -1,4 +1,4 @@
-.PHONY: gen open build run-16 device site
+.PHONY: gen open build run-16 device site deploy
 
 SIM    ?= iPhone 16e
 PROJ   := ios/Nox.xcodeproj
@@ -39,3 +39,8 @@ device:
 # preview the nox.church landing page at http://localhost:4242
 site:
 	cd site && python3 -m http.server 4242
+
+# deploy the landing page to the droplet (nox.church -> /var/www/nox)
+deploy:
+	rsync -avz --delete site/ droplet:/var/www/nox/
+	@echo "deployed -> https://nox.church"
