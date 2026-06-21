@@ -207,7 +207,7 @@ private struct DomainsSection: View {
                             .font(Theme.mono(.body))
                             .foregroundColor(Theme.text)
                             .tint(Theme.text)
-                            .keyboardType(.URL)
+                            .keyboardType(.asciiCapable)   // force ASCII — no CJK/IME engine (that was the lag)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                             .focused($fieldFocused)
