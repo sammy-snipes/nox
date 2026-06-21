@@ -1,13 +1,11 @@
 import SwiftUI
 import FamilyControls
+import UIKit
 
 /// The whole app — one screen. No nav bar, no pushes, no sheets.
 struct BlocklistView: View {
     @EnvironmentObject var controller: BlockController
     @State private var showPicker = false
-    @State private var addingDomain = false
-    @State private var draftDomain = ""
-    @FocusState private var domainFieldFocused: Bool
 
     private let presets = [1, 5, 15, 30, 60]
     private var locked: Bool { controller.isBlocking }
@@ -20,12 +18,12 @@ struct BlocklistView: View {
                     .foregroundColor(Theme.text)
 
                 appsSection
-                domainsSection
+                DomainsSection(locked: locked)   // isolated: typing never re-renders this parent
                 delaySection
             }
             .padding(24)
             .contentShape(Rectangle())
-            .onTapGesture { if addingDomain { domainFieldFocused = false } }
+            .onTapGesture { dismissKeyboard() }
         }
         .scrollDismissesKeyboard(.immediately)
         .background(Theme.background.ignoresSafeArea())
@@ -43,7 +41,7 @@ struct BlocklistView: View {
 
     private var appsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            header("blocked apps")
+            sectionHeader("blocked apps")
             Text(controller.appCount == 0 ? "none" : "\(controller.appCount) selected")
                 .font(Theme.mono(.body))
                 .foregroundColor(Theme.text)
@@ -59,94 +57,11 @@ struct BlocklistView: View {
         }
     }
 
-    // MARK: Domains
-
-    private var domainsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            header("blocked domains")
-
-            if controller.blockedDomains.isEmpty && !addingDomain {
-                Text("none")
-                    .font(Theme.mono(.body))
-                    .foregroundColor(Theme.text)
-                    .opacity(0.4)
-            }
-
-            ForEach(controller.blockedDomains, id: \.self) { domain in
-                HStack {
-                    Text(domain)
-                        .font(Theme.mono(.body))
-                        .foregroundColor(Theme.text)
-                    Spacer()
-                    if !locked {
-                        Button(action: { controller.removeDomain(domain) }) {
-                            Text("[x]")
-                                .font(Theme.mono(.body))
-                                .foregroundColor(Theme.text)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
-
-            if !locked {
-                if addingDomain {
-                    HStack(spacing: 8) {
-                        Text(">")
-                            .font(Theme.mono(.body))
-                            .foregroundColor(Theme.text)
-                            .opacity(0.5)
-                        TextField("reddit.com", text: $draftDomain)
-                            .font(Theme.mono(.body))
-                            .foregroundColor(Theme.text)
-                            .tint(Theme.text)
-                            .keyboardType(.URL)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                            .focused($domainFieldFocused)
-                            .submitLabel(.done)
-                            .onSubmit(commitDomain)
-                            .onAppear { domainFieldFocused = true }
-                            .onChange(of: domainFieldFocused) { focused in
-                                if !focused { finishAdding() }   // tap-out / scroll commits + closes
-                            }
-                    }
-                } else {
-                    Button(action: { addingDomain = true; draftDomain = "" }) {
-                        Text("+ add domain")
-                            .font(Theme.mono(.body))
-                            .foregroundColor(Theme.text)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-    }
-
-    private func commitDomain() {
-        let trimmed = draftDomain.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.isEmpty {
-            addingDomain = false        // empty return closes the typer
-            return
-        }
-        controller.addDomain(trimmed)
-        draftDomain = ""
-        domainFieldFocused = true       // stay open for rapid multi-add
-    }
-
-    // Exit text entry (tap outside / scroll): save what's typed, then close.
-    private func finishAdding() {
-        let trimmed = draftDomain.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !trimmed.isEmpty { controller.addDomain(trimmed) }
-        draftDomain = ""
-        addingDomain = false
-    }
-
     // MARK: Delay
 
     private var delaySection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            header("turn-off delay")
+            sectionHeader("turn-off delay")
             HStack(spacing: 8) {
                 ForEach(presets, id: \.self) { minutes in
                     Button(action: { controller.setDelay(minutes) }) {
@@ -172,7 +87,7 @@ struct BlocklistView: View {
         }
     }
 
-    // MARK: Action bar (turn on / turn off / countdown — all inline)
+    // MARK: Action bar
 
     private var actionBar: some View {
         VStack(spacing: 0) {
@@ -224,17 +139,6 @@ struct BlocklistView: View {
         }
     }
 
-    // MARK: Helpers
-
-    private func header(_ title: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(Theme.mono(.caption))
-                .foregroundColor(Theme.text)
-            Rectangle().frame(height: 1).foregroundColor(Theme.border)
-        }
-    }
-
     private func actionButton(_ title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
@@ -247,5 +151,107 @@ struct BlocklistView: View {
     private func format(_ t: TimeInterval) -> String {
         let s = Int(t.rounded(.up))
         return String(format: "%02d:%02d", s / 60, s % 60)
+    }
+
+    private func dismissKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+
+/// Domain list + inline typer. Kept as its own view with LOCAL draft state so
+/// keystrokes only re-render this — never the parent's FamilyControls picker /
+/// token reads, which do slow Screen Time XPC. That re-render was the lag.
+private struct DomainsSection: View {
+    @EnvironmentObject var controller: BlockController
+    let locked: Bool
+    @State private var addingDomain = false
+    @State private var draftDomain = ""
+    @FocusState private var fieldFocused: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("blocked domains")
+
+            if controller.blockedDomains.isEmpty && !addingDomain {
+                Text("none")
+                    .font(Theme.mono(.body))
+                    .foregroundColor(Theme.text)
+                    .opacity(0.4)
+            }
+
+            ForEach(controller.blockedDomains, id: \.self) { domain in
+                HStack {
+                    Text(domain)
+                        .font(Theme.mono(.body))
+                        .foregroundColor(Theme.text)
+                    Spacer()
+                    if !locked {
+                        Button(action: { controller.removeDomain(domain) }) {
+                            Text("[x]")
+                                .font(Theme.mono(.body))
+                                .foregroundColor(Theme.text)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+
+            if !locked {
+                if addingDomain {
+                    HStack(spacing: 8) {
+                        Text(">")
+                            .font(Theme.mono(.body))
+                            .foregroundColor(Theme.text)
+                            .opacity(0.5)
+                        TextField("reddit.com", text: $draftDomain)
+                            .font(Theme.mono(.body))
+                            .foregroundColor(Theme.text)
+                            .tint(Theme.text)
+                            .keyboardType(.URL)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .focused($fieldFocused)
+                            .submitLabel(.done)
+                            .onSubmit(commitDomain)
+                            .onAppear { fieldFocused = true }
+                            .onChange(of: fieldFocused) { focused in
+                                if !focused { finishAdding() }   // tap-out / scroll commits + closes
+                            }
+                    }
+                } else {
+                    Button(action: { addingDomain = true; draftDomain = "" }) {
+                        Text("+ add domain")
+                            .font(Theme.mono(.body))
+                            .foregroundColor(Theme.text)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private func commitDomain() {
+        let trimmed = draftDomain.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty { addingDomain = false; return }
+        controller.addDomain(trimmed)
+        draftDomain = ""
+        fieldFocused = true       // stay open for rapid multi-add
+    }
+
+    private func finishAdding() {
+        let trimmed = draftDomain.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty { controller.addDomain(trimmed) }
+        draftDomain = ""
+        addingDomain = false
+    }
+}
+
+// shared by both views (file-private)
+private func sectionHeader(_ title: String) -> some View {
+    VStack(alignment: .leading, spacing: 8) {
+        Text(title)
+            .font(Theme.mono(.caption))
+            .foregroundColor(Theme.text)
+        Rectangle().frame(height: 1).foregroundColor(Theme.border)
     }
 }
