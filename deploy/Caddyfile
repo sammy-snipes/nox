@@ -1,13 +1,13 @@
 # Live config on the droplet (/etc/caddy/Caddyfile). Caddy is the single
 # front door, dual-hosting both sites with automatic HTTPS:
-#   sammysnipes.com -> /var/www/sammysnipes  (built from the schizophrenia repo)
+#   sammysnipes.com -> /var/www/schizophrenia  (built from the schizophrenia repo)
 #   nox.church      -> /var/www/nox              (this repo, `make deploy`)
 {
 	email hanzomain26267@gmail.com
 }
 
 sammysnipes.com, www.sammysnipes.com {
-	root * /var/www/sammysnipes
+	root * /var/www/schizophrenia
 	try_files {path} /index.html
 	encode gzip
 	file_server
