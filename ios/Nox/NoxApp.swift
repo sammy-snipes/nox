@@ -2,15 +2,13 @@ import SwiftUI
 
 @main
 struct NoxApp: App {
-    @StateObject private var deviceManager = DeviceManager()
+    @StateObject private var controller = BlockController()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(deviceManager)
-                .onAppear {
-                    APIClient.shared.configure(deviceManager: deviceManager)
-                }
+                .environmentObject(controller)
+                .preferredColorScheme(.dark)
         }
     }
 }

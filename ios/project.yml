@@ -2,7 +2,7 @@ name: Nox
 options:
   bundleIdPrefix: com.nox
   deploymentTarget:
-    iOS: "17.0"
+    iOS: "16.0"
   xcodeVersion: "16.0"
 targets:
   Nox:
@@ -10,6 +10,10 @@ targets:
     platform: iOS
     sources:
       - Nox
+    entitlements:
+      path: Nox/Nox.entitlements
+      properties:
+        com.apple.developer.family-controls: true
     info:
       path: Nox/Info.plist
       properties:

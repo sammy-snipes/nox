@@ -1,146 +1,58 @@
 import SwiftUI
+import FamilyControls
 
 struct BlocklistView: View {
-    @EnvironmentObject var deviceManager: DeviceManager
-    @State private var domains: [BlockedDomain] = []
-    @State private var apps: [BlockedApp] = []
-    @State private var activeSession: BlockSession?
-    @State private var showAddDomain = false
-    @State private var showAddApp = false
+    @EnvironmentObject var controller: BlockController
+    @State private var showPicker = false
     @State private var showUnblock = false
     @State private var showSettings = false
-    @State private var pendingRemoveDomain: BlockedDomain?
-    @State private var pendingRemoveApp: BlockedApp?
-    @State private var error: String?
 
     var body: some View {
         NavigationStack {
-            List {
-                // Domains section
-                Section {
-                    ForEach(domains) { domain in
-                        HStack {
-                            Text(domain.domain)
-                                .font(Theme.mono(.body))
-                                .foregroundColor(Theme.text)
-                            Spacer()
-                            Button(action: {
-                                if activeSession != nil {
-                                    pendingRemoveDomain = domain
-                                    showUnblock = true
-                                } else {
-                                    removeDomain(domain)
-                                }
-                            }) {
-                                Text("[x]")
-                                    .font(Theme.mono(.body))
-                                    .foregroundColor(Theme.text)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        .listRowBackground(Theme.background)
-                        .listRowSeparatorTint(Theme.border)
-                    }
-
-                    Button(action: { showAddDomain = true }) {
-                        Text("+ add domain")
-                            .font(Theme.mono(.body))
-                            .foregroundColor(Theme.text)
-                    }
-                    .buttonStyle(.plain)
-                    .listRowBackground(Theme.background)
-                    .listRowSeparatorTint(Theme.border)
-                } header: {
-                    Text("blocked domains")
+            VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("blocked")
                         .font(Theme.mono(.caption))
                         .foregroundColor(Theme.text)
-                        .textCase(nil)
+                    Rectangle().frame(height: 1).foregroundColor(Theme.border)
+
+                    row("apps", controller.selection.applicationTokens.count)
+                    row("categories", controller.selection.categoryTokens.count)
+                    row("websites", controller.selection.webDomainTokens.count)
                 }
 
-                // Apps section
-                Section {
-                    ForEach(apps) { app in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(app.displayName)
-                                    .font(Theme.mono(.body))
-                                    .foregroundColor(Theme.text)
-                                Text(app.bundleId)
-                                    .font(Theme.mono(.caption2))
-                                    .foregroundColor(Theme.text)
-                            }
-                            Spacer()
-                            Button(action: {
-                                if activeSession != nil {
-                                    pendingRemoveApp = app
-                                    showUnblock = true
-                                } else {
-                                    removeApp(app)
-                                }
-                            }) {
-                                Text("[x]")
-                                    .font(Theme.mono(.body))
-                                    .foregroundColor(Theme.text)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        .listRowBackground(Theme.background)
-                        .listRowSeparatorTint(Theme.border)
-                    }
+                Button(action: { showPicker = true }) {
+                    Text(controller.isBlocking ? "edit (locked while active)" : "+ choose what to block")
+                        .font(Theme.mono(.body))
+                        .foregroundColor(Theme.text)
+                }
+                .buttonStyle(.plain)
+                .disabled(controller.isBlocking)
+                .opacity(controller.isBlocking ? 0.3 : 1)
 
-                    Button(action: { showAddApp = true }) {
-                        Text("+ add app")
-                            .font(Theme.mono(.body))
-                            .foregroundColor(Theme.text)
+                Spacer()
+
+                if controller.isBlocking {
+                    Button(action: { showUnblock = true }) {
+                        Text("[ unblock ]")
+                            .terminalButton()
+                            .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.plain)
-                    .listRowBackground(Theme.background)
-                    .listRowSeparatorTint(Theme.border)
-                } header: {
-                    Text("blocked apps")
-                        .font(Theme.mono(.caption))
-                        .foregroundColor(Theme.text)
-                        .textCase(nil)
-                }
-
-                // Session section
-                Section {
-                    if let session = activeSession, session.isActive {
-                        Button(action: { showUnblock = true }) {
-                            Text("[ unblock ]")
-                                .font(Theme.mono(.body))
-                                .foregroundColor(Theme.text)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                        }
-                        .buttonStyle(.plain)
-                        .listRowBackground(Theme.background)
-                    } else {
-                        Button(action: { activateSession() }) {
-                            Text("[ activate ]")
-                                .font(Theme.mono(.body))
-                                .foregroundColor(Theme.text)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                        }
-                        .buttonStyle(.plain)
-                        .listRowBackground(Theme.background)
+                } else {
+                    Button(action: { controller.startBlocking() }) {
+                        Text("[ activate ]")
+                            .terminalButton()
+                            .frame(maxWidth: .infinity)
                     }
-                }
-
-                if let error {
-                    Section {
-                        Text(error)
-                            .font(Theme.mono(.caption))
-                            .foregroundColor(Theme.text)
-                            .listRowBackground(Theme.background)
-                    }
+                    .buttonStyle(.plain)
+                    .disabled(!controller.hasSelection)
+                    .opacity(controller.hasSelection ? 1 : 0.3)
                 }
             }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
+            .padding(24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .background(Theme.background)
-            .refreshable {
-                await loadData()
-            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Text("nox")
@@ -157,83 +69,31 @@ struct BlocklistView: View {
             }
             .toolbarBackground(Theme.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .sheet(isPresented: $showAddDomain) {
-                AddDomainView(onAdded: { Task { await loadData() } })
-            }
-            .sheet(isPresented: $showAddApp) {
-                AddAppView(onAdded: { Task { await loadData() } })
-            }
+            .familyActivityPicker(
+                isPresented: $showPicker,
+                selection: Binding(
+                    get: { controller.selection },
+                    set: { controller.saveSelection($0) }
+                )
+            )
             .navigationDestination(isPresented: $showUnblock) {
-                if let session = activeSession {
-                    UnblockView(session: session, onUnblocked: {
-                        Task { await loadData() }
-                    })
-                }
+                UnblockView()
             }
             .navigationDestination(isPresented: $showSettings) {
                 SettingsView()
             }
-            .task {
-                await loadData()
-            }
         }
     }
 
-    private func loadData() async {
-        do {
-            let blocklist = try await APIClient.shared.getBlocklist()
-            let session = try await APIClient.shared.getActiveSession()
-            await MainActor.run {
-                domains = blocklist.domains
-                apps = blocklist.apps
-                activeSession = session
-                error = nil
-            }
-        } catch {
-            await MainActor.run {
-                self.error = error.localizedDescription
-            }
-        }
-    }
-
-    private func removeDomain(_ domain: BlockedDomain) {
-        Task {
-            do {
-                try await APIClient.shared.removeDomain(id: domain.id)
-                await loadData()
-            } catch {
-                await MainActor.run {
-                    self.error = error.localizedDescription
-                }
-            }
-        }
-    }
-
-    private func removeApp(_ app: BlockedApp) {
-        Task {
-            do {
-                try await APIClient.shared.removeApp(id: app.id)
-                await loadData()
-            } catch {
-                await MainActor.run {
-                    self.error = error.localizedDescription
-                }
-            }
-        }
-    }
-
-    private func activateSession() {
-        Task {
-            do {
-                let session = try await APIClient.shared.startSession(endsAt: nil, unlockMethod: "type_to_unlock")
-                await MainActor.run {
-                    activeSession = session
-                }
-            } catch {
-                await MainActor.run {
-                    self.error = error.localizedDescription
-                }
-            }
+    private func row(_ label: String, _ count: Int) -> some View {
+        HStack {
+            Text(label)
+                .font(Theme.mono(.body))
+                .foregroundColor(Theme.text)
+            Spacer()
+            Text("\(count)")
+                .font(Theme.mono(.body))
+                .foregroundColor(Theme.text)
         }
     }
 }

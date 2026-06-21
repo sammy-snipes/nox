@@ -66,16 +66,13 @@ class NoPasteUITextField: UITextField {
 }
 
 struct UnblockView: View {
+    @EnvironmentObject var controller: BlockController
     @Environment(\.dismiss) var dismiss
-    let session: BlockSession
-    var onUnblocked: () -> Void
 
     static let unlockText = "I am choosing to remove the restrictions I placed on myself. I understand that I set these boundaries for a reason, and that this moment of weakness will pass. I am making a deliberate choice to prioritize short-term comfort over my long-term goals. This is not what I want."
 
     @State private var typedText = ""
     @State private var showReset = false
-    @State private var error: String?
-    @State private var isSubmitting = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -118,12 +115,6 @@ struct UnblockView: View {
                     .foregroundColor(Theme.text)
             }
 
-            if let error {
-                Text(error)
-                    .font(Theme.mono(.caption))
-                    .foregroundColor(Theme.text)
-            }
-
             Spacer()
         }
         .padding(24)
@@ -145,10 +136,10 @@ struct UnblockView: View {
 
     private func handleTextChange(_ newText: String) {
         let target = Self.unlockText
-        let targetPrefix = String(target.prefix(newText.count))
 
         if newText == target {
-            submitUnblock()
+            controller.stopBlocking()
+            dismiss()
             return
         }
 
@@ -157,26 +148,6 @@ struct UnblockView: View {
             showReset = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 showReset = false
-            }
-        }
-    }
-
-    private func submitUnblock() {
-        guard !isSubmitting else { return }
-        isSubmitting = true
-
-        Task {
-            do {
-                try await APIClient.shared.submitUnblock(sessionId: session.id, unlockText: typedText)
-                await MainActor.run {
-                    onUnblocked()
-                    dismiss()
-                }
-            } catch {
-                await MainActor.run {
-                    self.error = error.localizedDescription
-                    isSubmitting = false
-                }
             }
         }
     }
