@@ -135,6 +135,10 @@ final class BlockController: ObservableObject {
             let domains = Set(blockedDomains.map { WebDomain(domain: $0) })
             store.webContent.blockedByFilter = .auto(domains, except: [])
         }
+
+        // hardening while a block is live (cleared on turn-off):
+        store.application.denyAppRemoval = true                // can't delete apps to escape
+        store.dateAndTime.requireAutomaticDateAndTime = true   // can't fast-forward the clock past the timer
     }
 
     private func clearShield() {
@@ -142,6 +146,8 @@ final class BlockController: ObservableObject {
         store.shield.applicationCategories = nil
         store.shield.webDomains = nil
         store.webContent.blockedByFilter = nil
+        store.application.denyAppRemoval = nil
+        store.dateAndTime.requireAutomaticDateAndTime = nil
     }
 
     // MARK: - Turn-off delay

@@ -163,15 +163,23 @@ struct BlocklistView: View {
     private var actionBar: some View {
         VStack(spacing: 0) {
             Rectangle().frame(height: 1).foregroundColor(Theme.border)
-            Group {
+            VStack(alignment: .leading, spacing: 12) {
                 if !controller.isBlocking {
-                    actionButton("[ turn on ]") { controller.startBlocking() }
-                        .disabled(!controller.hasSomethingToBlock)
-                        .opacity(controller.hasSomethingToBlock ? 1 : 0.3)
-                } else if !controller.isUnlockPending {
-                    actionButton("[ turn off ]") { controller.beginUnlock() }
-                } else {
-                    countdown
+                    Text("while on: you cant delete apps and the clock is locked. turning off takes the full wait.")
+                        .font(Theme.mono(.caption2))
+                        .foregroundColor(Theme.text)
+                        .opacity(0.5)
+                }
+                Group {
+                    if !controller.isBlocking {
+                        actionButton("[ turn on ]") { controller.startBlocking() }
+                            .disabled(!controller.hasSomethingToBlock)
+                            .opacity(controller.hasSomethingToBlock ? 1 : 0.3)
+                    } else if !controller.isUnlockPending {
+                        actionButton("[ turn off ]") { controller.beginUnlock() }
+                    } else {
+                        countdown
+                    }
                 }
             }
             .padding(16)
