@@ -55,8 +55,10 @@ struct BlocklistView: View {
     private var appsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             header("blocked apps")
-            row("apps", controller.appCount)
-            row("categories", controller.categoryCount)
+            Text(controller.appCount == 0 ? "none" : "\(controller.appCount) selected")
+                .font(Theme.mono(.body))
+                .foregroundColor(Theme.text)
+                .opacity(controller.appCount == 0 ? 0.4 : 1)
             Button(action: { if !locked { showPicker = true } }) {
                 Text(locked ? "edit (locked while on)" : "+ choose apps")
                     .font(Theme.mono(.body))
@@ -107,7 +109,25 @@ struct BlocklistView: View {
 
     private var actionBar: some View {
         VStack(spacing: 0) {
+            // turn-off delay, visible + tappable straight to settings
+            Button(action: { showSettings = true }) {
+                HStack {
+                    Text("turn-off delay")
+                        .font(Theme.mono(.caption))
+                        .foregroundColor(Theme.text)
+                    Spacer()
+                    Text("\(controller.unlockDelayMinutes)m")
+                        .font(Theme.mono(.caption))
+                        .foregroundColor(Theme.text)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
+            }
+            .buttonStyle(.plain)
+
             Rectangle().frame(height: 1).foregroundColor(Theme.border)
+
             Group {
                 if controller.isBlocking {
                     actionButton(controller.isUnlockPending ? "[ resume turn-off ]" : "[ turn off ]") {
@@ -132,18 +152,6 @@ struct BlocklistView: View {
                 .font(Theme.mono(.caption))
                 .foregroundColor(Theme.text)
             Rectangle().frame(height: 1).foregroundColor(Theme.border)
-        }
-    }
-
-    private func row(_ label: String, _ count: Int) -> some View {
-        HStack {
-            Text(label)
-                .font(Theme.mono(.body))
-                .foregroundColor(Theme.text)
-            Spacer()
-            Text("\(count)")
-                .font(Theme.mono(.body))
-                .foregroundColor(Theme.text)
         }
     }
 

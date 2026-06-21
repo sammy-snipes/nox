@@ -28,7 +28,7 @@
 		7F1E13F9D4FE0CFE72FC213E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		86A80F85BC796848A6EA5ABF /* BlocklistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlocklistView.swift; sourceTree = "<group>"; };
 		90BC5FF79C4DBCD5B230B421 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		914E4F12CC47002B9A3EF281 /* Nox.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Nox.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		914E4F12CC47002B9A3EF281 /* Nox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A8D4F62203E5A40B89027F47 /* AddDomainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddDomainView.swift; sourceTree = "<group>"; };
 		D8AA9566C428C9B59301E47A /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -104,11 +104,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
-				TargetAttributes = {
-					FC8A6713755DF2E45F6AC9C1 = {
-						DevelopmentTeam = "";
-					};
-				};
 			};
 			buildConfigurationList = D2789062E1ADCA85F18E52E2 /* Build configuration list for PBXProject "Nox" */;
 			developmentRegion = en;
@@ -155,7 +150,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Nox/Nox.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = L6AHAHH77B;
 				INFOPLIST_FILE = Nox/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -238,7 +233,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Nox/Nox.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = L6AHAHH77B;
 				INFOPLIST_FILE = Nox/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
