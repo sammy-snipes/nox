@@ -3,7 +3,7 @@
 SIM    ?= iPhone 16e
 PROJ   := ios/Nox.xcodeproj
 SCHEME := Nox
-APP_ID := com.nox.app
+APP_ID := com.samuelellis.nox
 
 # regenerate the Xcode project from project.yml (brew install xcodegen)
 gen:

@@ -1,6 +1,6 @@
 name: Nox
 options:
-  bundleIdPrefix: com.nox
+  bundleIdPrefix: com.samuelellis
   deploymentTarget:
     iOS: "16.0"
   xcodeVersion: "16.0"
@@ -26,7 +26,7 @@ targets:
           - UIInterfaceOrientationPortrait
         UIUserInterfaceStyle: Dark
     settings:
-      PRODUCT_BUNDLE_IDENTIFIER: com.nox.app
+      PRODUCT_BUNDLE_IDENTIFIER: com.samuelellis.nox
       INFOPLIST_KEY_UIApplicationSceneManifest_Generation: true
       SWIFT_VERSION: "5.10"
       DEVELOPMENT_TEAM: ""
