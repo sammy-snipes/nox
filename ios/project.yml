@@ -28,5 +28,6 @@ targets:
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.samuelellis.nox
       INFOPLIST_KEY_UIApplicationSceneManifest_Generation: true
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
       SWIFT_VERSION: "5.10"
       DEVELOPMENT_TEAM: ""

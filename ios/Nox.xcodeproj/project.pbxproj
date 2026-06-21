@@ -10,6 +10,7 @@
 		387EB8D7209FA0CBFF8BE0D4 /* BlockController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172491D9ABFC7DC53BDFC47A /* BlockController.swift */; };
 		482B0DFC66644D90EA1E7949 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1E13F9D4FE0CFE72FC213E /* ContentView.swift */; };
 		4B626DEBD73A2C994B67A37A /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22E1041E494E3A030172B107 /* AuthView.swift */; };
+		89F55F8FF79F676F1774D224 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3BC41ED8C0FC76D9A2E18580 /* Assets.xcassets */; };
 		C2EAD36D7887B4F6CB0958BC /* NoxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D47FE31998019A7B88CAA7B /* NoxApp.swift */; };
 		C7AC9FB6DD10B822B37C4FAA /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8AA9566C428C9B59301E47A /* Theme.swift */; };
 		CDFFCDEEE2B7FC29F713F16C /* BlocklistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86A80F85BC796848A6EA5ABF /* BlocklistView.swift */; };
@@ -20,10 +21,11 @@
 		22E1041E494E3A030172B107 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		2D47FE31998019A7B88CAA7B /* NoxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoxApp.swift; sourceTree = "<group>"; };
 		2F3FF190D90F26576BF2A295 /* Nox.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Nox.entitlements; sourceTree = "<group>"; };
+		3BC41ED8C0FC76D9A2E18580 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		475E664DFD85CF66BE96E6FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		7F1E13F9D4FE0CFE72FC213E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		86A80F85BC796848A6EA5ABF /* BlocklistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlocklistView.swift; sourceTree = "<group>"; };
-		914E4F12CC47002B9A3EF281 /* Nox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nox.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		914E4F12CC47002B9A3EF281 /* Nox.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Nox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D8AA9566C428C9B59301E47A /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -31,6 +33,7 @@
 		175096EC7F955B6BC08A1704 /* Nox */ = {
 			isa = PBXGroup;
 			children = (
+				3BC41ED8C0FC76D9A2E18580 /* Assets.xcassets */,
 				172491D9ABFC7DC53BDFC47A /* BlockController.swift */,
 				7F1E13F9D4FE0CFE72FC213E /* ContentView.swift */,
 				475E664DFD85CF66BE96E6FB /* Info.plist */,
@@ -75,6 +78,7 @@
 			buildConfigurationList = C52B2EBA082586FD534B1AE6 /* Build configuration list for PBXNativeTarget "Nox" */;
 			buildPhases = (
 				ADF3AD432DDC0305AE12A3D9 /* Sources */,
+				619AE0472A482FB67381400B /* Resources */,
 			);
 			buildRules = (
 			);
@@ -95,6 +99,11 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					FC8A6713755DF2E45F6AC9C1 = {
+						DevelopmentTeam = "";
+					};
+				};
 			};
 			buildConfigurationList = D2789062E1ADCA85F18E52E2 /* Build configuration list for PBXProject "Nox" */;
 			developmentRegion = en;
@@ -114,6 +123,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		619AE0472A482FB67381400B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				89F55F8FF79F676F1774D224 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		ADF3AD432DDC0305AE12A3D9 /* Sources */ = {
@@ -138,7 +158,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Nox/Nox.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = L6AHAHH77B;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Nox/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -221,7 +241,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Nox/Nox.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = L6AHAHH77B;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Nox/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
