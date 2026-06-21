@@ -1,4 +1,4 @@
-.PHONY: gen open build run-16 device site deploy
+.PHONY: gen open build run-16 device device-release site deploy
 
 SIM    ?= iPhone 16e
 PROJ   := ios/Nox.xcodeproj
@@ -35,6 +35,14 @@ device:
 		-destination 'generic/platform=iOS' -allowProvisioningUpdates build && \
 	xcrun devicectl device install app --device "$$(xcrun devicectl list devices 2>/dev/null | awk 'NR==3{print $$3}')" \
 		"$$(find ~/Library/Developer/Xcode/DerivedData -name 'Nox.app' -path '*/Debug-iphoneos/*' | head -1)"
+
+# same as `device` but Release config — first-interaction lag (keyboard cold
+# start, SwiftUI first-render) is dramatically lower than Debug
+device-release:
+	xcodebuild -project $(PROJ) -scheme $(SCHEME) -configuration Release \
+		-destination 'generic/platform=iOS' -allowProvisioningUpdates build && \
+	xcrun devicectl device install app --device "$$(xcrun devicectl list devices 2>/dev/null | awk 'NR==3{print $$3}')" \
+		"$$(find ~/Library/Developer/Xcode/DerivedData -name 'Nox.app' -path '*/Release-iphoneos/*' | head -1)"
 
 # preview the nox.church landing page at http://localhost:4242
 site:
