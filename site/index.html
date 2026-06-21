@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>nox — lights out</title>
+<meta name="description" content="Block the apps and sites that own you. On-device. No account, no server, no subscription.">
+<meta property="og:title" content="nox — lights out">
+<meta property="og:description" content="Block the apps and sites that own you. On-device. No account, no server, no subscription.">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: #000;
+    color: #fff;
+    font-family: ui-monospace, "SF Mono", Menlo, Monaco, monospace;
+    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+    padding: 10vh 24px;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { width: 100%; max-width: 540px; }
+  h1 {
+    font-size: 28px;
+    font-weight: 400;
+    margin: 0 0 4px;
+    letter-spacing: 1px;
+  }
+  .cursor {
+    display: inline-block;
+    width: 0.6em; height: 1.05em;
+    background: #fff;
+    margin-left: 2px;
+    transform: translateY(2px);
+    animation: blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  .tagline { font-size: 18px; margin: 0 0 40px; opacity: 0.9; }
+  p { margin: 0 0 18px; font-size: 14px; }
+  .dim { opacity: 0.55; }
+  hr { border: 0; border-top: 1px solid #fff; opacity: 0.4; margin: 32px 0; }
+  .actions { display: flex; gap: 12px; flex-wrap: wrap; margin: 28px 0 0; }
+  a.btn {
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 9px 16px;
+    border: 1px solid #fff;
+  }
+  a.btn:hover { background: #fff; color: #000; }
+  footer { margin-top: 56px; font-size: 12px; opacity: 0.45; }
+  footer em { font-style: italic; }
+</style>
+</head>
+<body>
+<main>
+  <h1>nox<span class="cursor"></span></h1>
+  <p class="tagline">lights out.</p>
+
+  <p>block the apps and sites that own you.</p>
+  <p class="dim">on-device. no account. no server. no subscription.</p>
+  <p>turning it off takes a deliberate wait — long enough for the urge to pass.</p>
+
+  <div class="actions">
+    <a class="btn" href="https://github.com/sammy-snipes/nox">source</a>
+    <a class="btn" href="#">download</a>
+  </div>
+
+  <hr>
+
+  <footer>
+    the church of going dark.<br>
+    <em>i set these boundaries for a reason.</em>
+  </footer>
+</main>
+</body>
+</html>

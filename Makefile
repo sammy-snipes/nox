@@ -1,4 +1,4 @@
-.PHONY: gen open build run-16 device
+.PHONY: gen open build run-16 device site
 
 SIM    ?= iPhone 16e
 PROJ   := ios/Nox.xcodeproj
@@ -35,3 +35,7 @@ device:
 		-destination 'generic/platform=iOS' -allowProvisioningUpdates build && \
 	xcrun devicectl device install app --device "$$(xcrun devicectl list devices 2>/dev/null | awk 'NR==3{print $$3}')" \
 		"$$(find ~/Library/Developer/Xcode/DerivedData -name 'Nox.app' -path '*/Debug-iphoneos/*' | head -1)"
+
+# preview the nox.church landing page at http://localhost:8000
+site:
+	cd site && python3 -m http.server 8000
