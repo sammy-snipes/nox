@@ -1,0 +1,9 @@
+{
+	email hanzomain26267@gmail.com
+}
+
+nox.church, www.nox.church {
+	root * /var/www/nox
+	encode gzip
+	file_server
+}
