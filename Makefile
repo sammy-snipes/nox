@@ -36,6 +36,6 @@ device:
 	xcrun devicectl device install app --device "$$(xcrun devicectl list devices 2>/dev/null | awk 'NR==3{print $$3}')" \
 		"$$(find ~/Library/Developer/Xcode/DerivedData -name 'Nox.app' -path '*/Debug-iphoneos/*' | head -1)"
 
-# preview the nox.church landing page at http://localhost:8000
+# preview the nox.church landing page at http://localhost:4242
 site:
-	cd site && python3 -m http.server 8000
+	cd site && python3 -m http.server 4242
