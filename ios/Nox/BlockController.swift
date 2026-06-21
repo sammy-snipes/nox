@@ -14,6 +14,7 @@ final class BlockController: ObservableObject {
     enum AuthState { case unknown, denied, approved }
 
     @Published var authState: AuthState = .unknown
+    @Published var hasGrantedOnce = false
     @Published var selection = FamilyActivitySelection()
     @Published var blockedDomains: [String] = []
     @Published var isBlocking = false
@@ -32,6 +33,7 @@ final class BlockController: ObservableObject {
         static let blocking = "nox.isBlocking"
         static let delay = "nox.delayMinutes"
         static let unlockStartedAt = "nox.unlockStartedAt"
+        static let granted = "nox.granted"
     }
 
     init() {
@@ -40,6 +42,7 @@ final class BlockController: ObservableObject {
         isBlocking = defaults.bool(forKey: Key.blocking)
         unlockDelayMinutes = defaults.object(forKey: Key.delay) as? Int ?? 5
         unlockStartedAt = defaults.object(forKey: Key.unlockStartedAt) as? Date
+        hasGrantedOnce = defaults.bool(forKey: Key.granted)
         refreshAuth()
     }
 
@@ -47,7 +50,12 @@ final class BlockController: ObservableObject {
 
     func refreshAuth() {
         switch AuthorizationCenter.shared.authorizationStatus {
-        case .approved: authState = .approved
+        case .approved:
+            authState = .approved
+            if !hasGrantedOnce {
+                hasGrantedOnce = true
+                defaults.set(true, forKey: Key.granted)
+            }
         case .denied: authState = .denied
         default: authState = .unknown
         }

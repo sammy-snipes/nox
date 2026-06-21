@@ -24,7 +24,10 @@ struct BlocklistView: View {
                 delaySection
             }
             .padding(24)
+            .contentShape(Rectangle())
+            .onTapGesture { if addingDomain { domainFieldFocused = false } }
         }
+        .scrollDismissesKeyboard(.immediately)
         .background(Theme.background.ignoresSafeArea())
         .safeAreaInset(edge: .bottom) { actionBar }
         .familyActivityPicker(
@@ -104,6 +107,9 @@ struct BlocklistView: View {
                             .submitLabel(.done)
                             .onSubmit(commitDomain)
                             .onAppear { domainFieldFocused = true }
+                            .onChange(of: domainFieldFocused) { focused in
+                                if !focused { finishAdding() }   // tap-out / scroll commits + closes
+                            }
                     }
                 } else {
                     Button(action: { addingDomain = true; draftDomain = "" }) {
@@ -126,6 +132,14 @@ struct BlocklistView: View {
         controller.addDomain(trimmed)
         draftDomain = ""
         domainFieldFocused = true       // stay open for rapid multi-add
+    }
+
+    // Exit text entry (tap outside / scroll): save what's typed, then close.
+    private func finishAdding() {
+        let trimmed = draftDomain.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty { controller.addDomain(trimmed) }
+        draftDomain = ""
+        addingDomain = false
     }
 
     // MARK: Delay

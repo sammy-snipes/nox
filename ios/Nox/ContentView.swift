@@ -5,10 +5,11 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            switch controller.authState {
-            case .approved:
+            // Once granted, skip the grant screen for good (unless explicitly revoked).
+            if controller.authState == .approved
+                || (controller.hasGrantedOnce && controller.authState != .denied) {
                 BlocklistView()
-            default:
+            } else {
                 AuthView()
             }
         }
