@@ -67,11 +67,8 @@ One on-device app. No server, no database, no enrollment.
 | Piece | Framework | Role |
 |-------|-----------|------|
 | `BlockController` | FamilyControls + ManagedSettings | Authorization, apps + domains, on/off, the turn-off delay |
-| `AuthView` | SwiftUI | One-tap Screen Time authorization |
-| `BlocklistView` | FamilyControls | Pick apps, type domains, turn on/off |
-| `AddDomainView` | SwiftUI | Type a domain to block |
-| `UnblockView` | SwiftUI | The turn-off delay countdown |
-| `SettingsView` | SwiftUI | Status + delay presets |
+| `AuthView` | SwiftUI | One-tap Screen Time authorization (the only other screen) |
+| `BlocklistView` | FamilyControls | The whole app on one screen — apps, domains, delay presets, turn on/off, inline countdown |
 | `Theme` | SwiftUI | The black/white monospace terminal look |
 
 ```
@@ -82,11 +79,8 @@ ios/Nox/
 ├── Theme.swift             # terminal aesthetic
 ├── Nox.entitlements        # com.apple.developer.family-controls
 └── Views/
-    ├── AuthView.swift
-    ├── BlocklistView.swift
-    ├── AddDomainView.swift
-    ├── UnblockView.swift
-    └── SettingsView.swift
+    ├── AuthView.swift        # one-time Screen Time grant
+    └── BlocklistView.swift   # the entire app, one screen
 ```
 
 ## Build

@@ -1,56 +1,42 @@
 import SwiftUI
 import FamilyControls
 
+/// The whole app — one screen. No nav bar, no pushes, no sheets.
 struct BlocklistView: View {
     @EnvironmentObject var controller: BlockController
     @State private var showPicker = false
-    @State private var showAddDomain = false
-    @State private var showUnblock = false
-    @State private var showSettings = false
+    @State private var addingDomain = false
+    @State private var draftDomain = ""
+    @FocusState private var domainFieldFocused: Bool
 
+    private let presets = [1, 5, 15, 30, 60]
     private var locked: Bool { controller.isBlocking }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 28) {
-                    appsSection
-                    domainsSection
-                }
-                .padding(24)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 28) {
+                Text("nox")
+                    .font(Theme.mono(.title2))
+                    .foregroundColor(Theme.text)
+
+                appsSection
+                domainsSection
+                delaySection
             }
-            .background(Theme.background)
-            .safeAreaInset(edge: .bottom) { actionBar }
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Text("nox")
-                        .font(Theme.mono(.title2))
-                        .foregroundColor(Theme.text)
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: { showSettings = true }) {
-                        Text(">")
-                            .font(Theme.mono(.body))
-                            .foregroundColor(Theme.text)
-                    }
-                }
-            }
-            .toolbarBackground(Theme.background, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .familyActivityPicker(
-                isPresented: $showPicker,
-                selection: Binding(
-                    get: { controller.selection },
-                    set: { controller.saveSelection($0) }
-                )
-            )
-            .sheet(isPresented: $showAddDomain) { AddDomainView() }
-            .navigationDestination(isPresented: $showUnblock) { UnblockView() }
-            .navigationDestination(isPresented: $showSettings) { SettingsView() }
+            .padding(24)
         }
+        .background(Theme.background.ignoresSafeArea())
+        .safeAreaInset(edge: .bottom) { actionBar }
+        .familyActivityPicker(
+            isPresented: $showPicker,
+            selection: Binding(
+                get: { controller.selection },
+                set: { controller.saveSelection($0) }
+            )
+        )
     }
 
-    // MARK: Sections
+    // MARK: Apps
 
     private var appsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -59,89 +45,161 @@ struct BlocklistView: View {
                 .font(Theme.mono(.body))
                 .foregroundColor(Theme.text)
                 .opacity(controller.appCount == 0 ? 0.4 : 1)
-            Button(action: { if !locked { showPicker = true } }) {
-                Text(locked ? "edit (locked while on)" : "+ choose apps")
-                    .font(Theme.mono(.body))
-                    .foregroundColor(Theme.text)
+            if !locked {
+                Button(action: { showPicker = true }) {
+                    Text("+ choose apps")
+                        .font(Theme.mono(.body))
+                        .foregroundColor(Theme.text)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
-            .disabled(locked)
-            .opacity(locked ? 0.4 : 1)
         }
     }
+
+    // MARK: Domains
 
     private var domainsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             header("blocked domains")
-            if controller.blockedDomains.isEmpty {
+
+            if controller.blockedDomains.isEmpty && !addingDomain {
                 Text("none")
                     .font(Theme.mono(.body))
                     .foregroundColor(Theme.text)
                     .opacity(0.4)
-            } else {
-                ForEach(controller.blockedDomains, id: \.self) { domain in
-                    HStack {
-                        Text(domain)
-                            .font(Theme.mono(.body))
-                            .foregroundColor(Theme.text)
-                        Spacer()
+            }
+
+            ForEach(controller.blockedDomains, id: \.self) { domain in
+                HStack {
+                    Text(domain)
+                        .font(Theme.mono(.body))
+                        .foregroundColor(Theme.text)
+                    Spacer()
+                    if !locked {
                         Button(action: { controller.removeDomain(domain) }) {
                             Text("[x]")
                                 .font(Theme.mono(.body))
                                 .foregroundColor(Theme.text)
                         }
                         .buttonStyle(.plain)
-                        .disabled(locked)
-                        .opacity(locked ? 0.3 : 1)
                     }
                 }
             }
-            Button(action: { if !locked { showAddDomain = true } }) {
-                Text(locked ? "+ add domain (locked while on)" : "+ add domain")
-                    .font(Theme.mono(.body))
-                    .foregroundColor(Theme.text)
+
+            if !locked {
+                if addingDomain {
+                    HStack(spacing: 8) {
+                        Text(">")
+                            .font(Theme.mono(.body))
+                            .foregroundColor(Theme.text)
+                            .opacity(0.5)
+                        TextField("reddit.com", text: $draftDomain)
+                            .font(Theme.mono(.body))
+                            .foregroundColor(Theme.text)
+                            .tint(Theme.text)
+                            .keyboardType(.URL)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .focused($domainFieldFocused)
+                            .submitLabel(.done)
+                            .onSubmit(commitDomain)
+                            .onAppear { domainFieldFocused = true }
+                    }
+                } else {
+                    Button(action: { addingDomain = true; draftDomain = "" }) {
+                        Text("+ add domain")
+                            .font(Theme.mono(.body))
+                            .foregroundColor(Theme.text)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
-            .buttonStyle(.plain)
-            .disabled(locked)
-            .opacity(locked ? 0.4 : 1)
         }
     }
 
+    private func commitDomain() {
+        let trimmed = draftDomain.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            addingDomain = false        // empty return closes the typer
+            return
+        }
+        controller.addDomain(trimmed)
+        draftDomain = ""
+        domainFieldFocused = true       // stay open for rapid multi-add
+    }
+
+    // MARK: Delay
+
+    private var delaySection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            header("turn-off delay")
+            HStack(spacing: 8) {
+                ForEach(presets, id: \.self) { minutes in
+                    Button(action: { controller.setDelay(minutes) }) {
+                        Text("\(minutes)m")
+                            .font(Theme.mono(.body))
+                            .foregroundColor(controller.unlockDelayMinutes == minutes ? Theme.background : Theme.text)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 8)
+                            .background(controller.unlockDelayMinutes == minutes ? Theme.text : Theme.background)
+                            .overlay(Rectangle().stroke(Theme.border, lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .disabled(locked)
+            .opacity(locked ? 0.3 : 1)
+            if locked {
+                Text("locked while on")
+                    .font(Theme.mono(.caption2))
+                    .foregroundColor(Theme.text)
+                    .opacity(0.6)
+            }
+        }
+    }
+
+    // MARK: Action bar (turn on / turn off / countdown — all inline)
+
     private var actionBar: some View {
         VStack(spacing: 0) {
-            // turn-off delay, visible + tappable straight to settings
-            Button(action: { showSettings = true }) {
-                HStack {
-                    Text("turn-off delay")
-                        .font(Theme.mono(.caption))
-                        .foregroundColor(Theme.text)
-                    Spacer()
-                    Text("\(controller.unlockDelayMinutes)m")
-                        .font(Theme.mono(.caption))
-                        .foregroundColor(Theme.text)
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 12)
-                .padding(.bottom, 8)
-            }
-            .buttonStyle(.plain)
-
             Rectangle().frame(height: 1).foregroundColor(Theme.border)
-
             Group {
-                if controller.isBlocking {
-                    actionButton(controller.isUnlockPending ? "[ resume turn-off ]" : "[ turn off ]") {
-                        showUnblock = true
-                    }
-                } else {
+                if !controller.isBlocking {
                     actionButton("[ turn on ]") { controller.startBlocking() }
                         .disabled(!controller.hasSomethingToBlock)
                         .opacity(controller.hasSomethingToBlock ? 1 : 0.3)
+                } else if !controller.isUnlockPending {
+                    actionButton("[ turn off ]") { controller.beginUnlock() }
+                } else {
+                    countdown
                 }
             }
             .padding(16)
         }
         .background(Theme.background)
+    }
+
+    private var countdown: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            let remaining = max(0, controller.unlockReadyAt?.timeIntervalSince(context.date) ?? 0)
+            VStack(spacing: 12) {
+                if remaining <= 0 {
+                    actionButton("[ confirm — turn off ]") { controller.completeUnlock() }
+                } else {
+                    Text("turning off in \(format(remaining))")
+                        .font(Theme.mono(.body))
+                        .foregroundColor(Theme.text)
+                        .frame(maxWidth: .infinity)
+                }
+                Button(action: { controller.cancelUnlock() }) {
+                    Text("cancel")
+                        .font(Theme.mono(.caption))
+                        .foregroundColor(Theme.text)
+                        .opacity(0.6)
+                }
+                .buttonStyle(.plain)
+            }
+        }
     }
 
     // MARK: Helpers
@@ -162,5 +220,10 @@ struct BlocklistView: View {
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
+    }
+
+    private func format(_ t: TimeInterval) -> String {
+        let s = Int(t.rounded(.up))
+        return String(format: "%02d:%02d", s / 60, s % 60)
     }
 }
