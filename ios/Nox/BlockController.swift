@@ -44,6 +44,10 @@ final class BlockController: ObservableObject {
         unlockStartedAt = defaults.object(forKey: Key.unlockStartedAt) as? Date
         hasGrantedOnce = defaults.bool(forKey: Key.granted)
         refreshAuth()
+        // Reconcile the system store with current state on every launch.
+        // Flushes any stale filter (e.g. an old `.auto` adult filter) and
+        // guarantees a removed domain is actually purged Apple-side.
+        if isBlocking { applyShield() } else { clearShield() }
     }
 
     // MARK: - Authorization
@@ -141,7 +145,7 @@ final class BlockController: ObservableObject {
             store.webContent.blockedByFilter = nil
         } else {
             let domains = Set(blockedDomains.map { WebDomain(domain: $0) })
-            store.webContent.blockedByFilter = .auto(domains, except: [])
+            store.webContent.blockedByFilter = .specific(domains)
         }
 
         // hardening while a block is live (cleared on turn-off):

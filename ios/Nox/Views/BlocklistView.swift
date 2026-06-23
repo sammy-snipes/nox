@@ -196,36 +196,37 @@ private struct DomainsSection: View {
                 }
             }
 
-            if !locked {
-                if addingDomain {
-                    HStack(spacing: 8) {
-                        Text(">")
-                            .font(Theme.mono(.body))
-                            .foregroundColor(Theme.text)
-                            .opacity(0.5)
-                        TextField("reddit.com", text: $draftDomain)
-                            .font(Theme.mono(.body))
-                            .foregroundColor(Theme.text)
-                            .tint(Theme.text)
-                            .keyboardType(.asciiCapable)   // force ASCII — no CJK/IME engine (that was the lag)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                            .focused($fieldFocused)
-                            .submitLabel(.done)
-                            .onSubmit(commitDomain)
-                            .onAppear { fieldFocused = true }
-                            .onChange(of: fieldFocused) { focused in
-                                if !focused { finishAdding() }   // tap-out / scroll commits + closes
-                            }
-                    }
-                } else {
-                    Button(action: { addingDomain = true; draftDomain = "" }) {
-                        Text("+ add domain")
-                            .font(Theme.mono(.body))
-                            .foregroundColor(Theme.text)
-                    }
-                    .buttonStyle(.plain)
+            // Adding is always allowed — even mid-block. It's strictly more
+            // restrictive, so it can't be an escape hatch. (Removal stays
+            // locked above via `if !locked` on the [x] buttons.)
+            if addingDomain {
+                HStack(spacing: 8) {
+                    Text(">")
+                        .font(Theme.mono(.body))
+                        .foregroundColor(Theme.text)
+                        .opacity(0.5)
+                    TextField("reddit.com", text: $draftDomain)
+                        .font(Theme.mono(.body))
+                        .foregroundColor(Theme.text)
+                        .tint(Theme.text)
+                        .keyboardType(.asciiCapable)   // force ASCII — no CJK/IME engine (that was the lag)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .focused($fieldFocused)
+                        .submitLabel(.done)
+                        .onSubmit(commitDomain)
+                        .onAppear { fieldFocused = true }
+                        .onChange(of: fieldFocused) { focused in
+                            if !focused { finishAdding() }   // tap-out / scroll commits + closes
+                        }
                 }
+            } else {
+                Button(action: { addingDomain = true; draftDomain = "" }) {
+                    Text("+ add domain")
+                        .font(Theme.mono(.body))
+                        .foregroundColor(Theme.text)
+                }
+                .buttonStyle(.plain)
             }
         }
     }
