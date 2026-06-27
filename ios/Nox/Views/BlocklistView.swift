@@ -46,13 +46,21 @@ struct BlocklistView: View {
                 .font(Theme.mono(.body))
                 .foregroundColor(Theme.text)
                 .opacity(controller.appCount == 0 ? 0.4 : 1)
-            if !locked {
-                Button(action: { showPicker = true }) {
-                    Text("+ choose apps")
-                        .font(Theme.mono(.body))
-                        .foregroundColor(Theme.text)
-                }
-                .buttonStyle(.plain)
+            // Always available — even mid-block. Mid-block the picker is
+            // append-only: saveSelection discards any edit that deselects, so
+            // it can't be used to escape (mirrors "+ add domain"). Removal of
+            // apps only happens by turning off and waiting out the delay.
+            Button(action: { showPicker = true }) {
+                Text(locked ? "+ add apps" : "+ choose apps")
+                    .font(Theme.mono(.body))
+                    .foregroundColor(Theme.text)
+            }
+            .buttonStyle(.plain)
+            if locked {
+                Text("you can add apps while on, but not remove them.")
+                    .font(Theme.mono(.caption2))
+                    .foregroundColor(Theme.text)
+                    .opacity(0.6)
             }
         }
     }

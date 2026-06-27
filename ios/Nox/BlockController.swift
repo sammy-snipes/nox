@@ -80,6 +80,18 @@ final class BlockController: ObservableObject {
     var categoryCount: Int { selection.categoryTokens.count }
 
     func saveSelection(_ newSelection: FamilyActivitySelection) {
+        // Mid-block the picker is append-only. The system sheet lets you both
+        // check and uncheck and we can't rebuild a selection from tokens to
+        // merge, so accept the edit only if it deselected nothing (the new
+        // token sets are supersets of the current ones). Pure additions are
+        // strictly more restrictive; any deselection would be an escape hatch,
+        // so it's discarded and the live block is left untouched.
+        if isBlocking {
+            let keepsApps = selection.applicationTokens.isSubset(of: newSelection.applicationTokens)
+            let keepsCats = selection.categoryTokens.isSubset(of: newSelection.categoryTokens)
+            let keepsWeb  = selection.webDomainTokens.isSubset(of: newSelection.webDomainTokens)
+            guard keepsApps, keepsCats, keepsWeb else { return }
+        }
         selection = newSelection
         if let data = try? JSONEncoder().encode(newSelection) {
             defaults.set(data, forKey: Key.selection)
